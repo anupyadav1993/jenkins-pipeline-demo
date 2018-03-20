@@ -25,15 +25,18 @@ stage 'Test'
             }
         }
 
+stage 'Publish Test Results' {
+    node(
+        [$class: 'JUnitResultArchiver',
+        testResults: "**/gameoflife-web/target/surefire-reports/*.xml"]
+    )
+}
+
 stage 'Approve'
     timeout(time: 7, unit: 'DAYS') {
     input('Do you want to proceed?')
 }        
 
-stage 'Approve'
-    timeout(time: 7, unit: 'DAYS') {
-    input('Do you want to proceed?')
-}
 
 stage 'Build'
     node{
