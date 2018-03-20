@@ -26,10 +26,9 @@ stage 'Test'
         }
 
 stage 'Publish Test Results' {
-    node(
-        [$class: 'JUnitResultArchiver',
-        testResults: "**/gameoflife-web/target/surefire-reports/*.xml"]
-    )
+    node{
+	junit '**/gameoflife-web/target/surefire-reports/*.xml'
+    }
 }
 
 stage 'Approve'
