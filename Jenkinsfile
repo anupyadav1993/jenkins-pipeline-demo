@@ -22,14 +22,7 @@ pipeline {
         stage('Publish Test Results') {
             steps {
                 junit 'gameoflife-core/build/test-results/*.xml'
-                publishHTML target: [
-                    allowMissing: false,
-                    alwaysLinkToLastBuild: false,
-                    keepAll: true,
-                    reportDir: 'gameoflife-core/build/reports/tests',
-                    reportFiles: 'index.html',
-                    reportName: 'Report'
-                  ]
+                publishHTML target: [allowMissing: false, alwaysLinkToLastBuild: false, keepAll: true, reportDir: 'gameoflife-core/build/reports/tests', reportFiles: 'index.html', reportName: 'Report']
             }
         }
         stage('Approve') {
@@ -41,8 +34,8 @@ pipeline {
         }
         stage('Deploy') {
             steps {
-                 sh'''
-                    
+                
+                sh'''
                     set -e
                     AWS="/usr/local/bin/aws"
                     DOCKER_LOGIN=`$AWS ecr get-login --no-include-email --region us-east-1`
