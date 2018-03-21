@@ -20,7 +20,7 @@ pipeline {
         }
         stage('Publish Test Results') {
             steps {
-                junit 'gameoflife-web/target/surefire-reports/**/*.xml'
+                junit 'gameoflife-core/build/test-results/*.xml'
             }
         }
 
