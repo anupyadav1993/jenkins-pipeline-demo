@@ -7,14 +7,18 @@ pipeline {
             }
         }    
         stage('Build and Test') {
-            steps {
-                docker.image('maven:3.3.3-jdk8').inside('-v ~/.m2/repository:/m2repo') {
-                    sh '''
-                        mvn -Dmaven.repo.local=/m2repo clean package
-                        mvn verify
-                        mvn sonar:sonar
-                    '''
+            agent {
+                docker{
+                    image 'maven:3.3.3-jdk8'
+                    args '-v ~/.m2/repository:/m2repo'
+
                 }
+            }
+            steps{
+                sh '''
+                    mvn -Dmaven.repo.local=/m2repo clean package
+                    mvn verify
+                '''       
             }
         }
         stage('Publish Test Results') {
