@@ -15,7 +15,6 @@ pipeline {
         
       }
       steps {
-
         sh '''  
                     mvn verify clean test package
                 '''
