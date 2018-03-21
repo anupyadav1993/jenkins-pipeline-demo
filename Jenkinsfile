@@ -32,7 +32,6 @@ pipeline {
                   ]
             }
         }
-
         stage('Approve') {
             steps {
                 timeout(time: 7, unit: 'DAYS') {
@@ -40,11 +39,10 @@ pipeline {
                 }
             }
         }
-
         stage('Deploy') {
             steps {
                  sh'''
-
+                    
                     set -e
                     AWS="/usr/local/bin/aws"
                     DOCKER_LOGIN=`$AWS ecr get-login --no-include-email --region us-east-1`
