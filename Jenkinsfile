@@ -1,15 +1,14 @@
-def mvnContainer = docker.image('jimschubert/8-jdk-alpine-mvn')
-
 pipeline {
     agent any
     stages {
         stage('Checkout'){
-            checkout scm
-        }
-
+            steps{
+                checkout scm
+            }
+        }    
         stage('Build and Test') {
             steps {
-                mvnContainer.inside('-v ~/.m2/repository:/m2repo') {
+                docker.image('maven:3.3.3-jdk8').inside('-v ~/.m2/repository:/m2repo') {
                     sh '''
                         mvn -Dmaven.repo.local=/m2repo clean package
                         mvn verify
