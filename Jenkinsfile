@@ -7,17 +7,13 @@ pipeline {
             }
         }    
         stage('Build and Test') {
-            agent {
-                docker{
-                    image 'maven:3.3.3-jdk-8'
-                    args '-v ~/.m2/repository:/m2repo'
-                }
-            }
             steps{
-                sh '''
-                    mvn -Dmaven.repo.local=/m2repo clean package
-                    mvn verify
-                '''       
+                withDockerContainer(image: 'maven:3.3.3-jdk-8', args: '-v=~/.m2/repository:/m2repo') {
+                    sh '''
+                        mvn -Dmaven.repo.local=/m2repo clean package
+                        mvn verify
+                    '''
+                }       
             }
         }
         stage('Publish Test Results') {
@@ -91,3 +87,7 @@ pipeline {
         }
     }
 }
+
+
+
+docker run -t -d -u 498:496 -v ~/.m2/repository:/m2repo
