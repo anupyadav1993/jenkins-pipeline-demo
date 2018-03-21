@@ -8,11 +8,13 @@ pipeline {
         }    
         stage('Build and Test') {
             steps{
-                withDockerContainer(image: 'maven:3.3.3-jdk-8', args: '-v=~/.m2/repository:/m2repo') {
+                timeout(time: 15, unit: "MINUTES"){
+                    withDockerContainer(image: 'maven:3.3.3-jdk-8', args: '-v=~/.m2/repository:/m2repo') {
                     sh '''
                         mvn -Dmaven.repo.local=/m2repo clean package
                         mvn verify
                     '''
+                    }
                 }       
             }
         }
