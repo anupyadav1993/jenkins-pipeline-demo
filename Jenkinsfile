@@ -7,16 +7,18 @@ pipeline {
             }
         }    
         stage('Build and Test') {
-            /*agent {
+            agent {
                 docker {
                   image 'maven:3.3.3-jdk-8'
                   reuseNode true    
                 }
-              }*/
+              }
             steps {
                 sh '''
                     mvn clean package
                     mvn verify
+                    pwd
+                    ls -ltrha
                 '''
               }
         }
