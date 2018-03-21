@@ -58,7 +58,7 @@ DOCKER_LOGIN=`$AWS ecr get-login --no-include-email --region us-east-1`
 IMAGE_NAME="jenkins-pipeline-demo"
 ${DOCKER_LOGIN}
 echo "Creating docker image..."
-NEW_WORKSPACE=$WORKSPACE@`expr $EXECUTOR_NUMBER + 2`
+NEW_WORKSPACE=$WORKSPACE@`expr $EXECUTOR_NUMBER + 1`
 cd $NEW_WORKSPACE/gameoflife-web
 git_tag=$(git tag --sort version:refname| tail -1)
 docker_image=$IMAGE_NAME:$git_tag
