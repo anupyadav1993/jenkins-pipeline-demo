@@ -42,7 +42,7 @@ DOCKER_LOGIN=`$AWS ecr get-login --no-include-email --region us-east-1`
 IMAGE_NAME="jenkins-pipeline-demo"
 ${DOCKER_LOGIN}
 echo "Creating docker image..."
-cd $WORKSPACE@2/gameoflife-web
+cd $WORKSPACE@$EXECUTOR_NUMBER/gameoflife-web
 git_tag=$(git tag --sort version:refname| tail -1)
 docker_image=$IMAGE_NAME:$git_tag
 sed -i 's/ROOT/$git_tag/g' Dockerfile
@@ -59,15 +59,15 @@ docker push 940345575562.dkr.ecr.us-east-1.amazonaws.com/$docker_image
 if [ $? -eq 0 ]
 then
     echo "Successfully image tagged and pushed to repository"
-    echo 940345575562.dkr.ecr.us-east-1.amazonaws.com/$docker_image > $WORKSPACE@2/image_id
-    cat $WORKSPACE@2/image_id
+    echo 940345575562.dkr.ecr.us-east-1.amazonaws.com/$docker_image > $WORKSPACE@$EXECUTOR_NUMBER/image_id
+    cat $WORKSPACE@$EXECUTOR_NUMBER/image_id
 else
     echo "Error in tagging/pushing image"
     exit 1
 fi
 TASK_FAMILY="jenkins-pipeline-demo-td"
 SERVICE_NAME="jenkins-pipeline-demo-svc"
-NEW_DOCKER_IMAGE=`cat $WORKSPACE@2/image_id`
+NEW_DOCKER_IMAGE=`cat $WORKSPACE@$EXECUTOR_NUMBER/image_id`
 CLUSTER_NAME="jenkins-pipeline-demo"
 OLD_TASK_DEF=$($AWS ecs describe-task-definition --task-definition $TASK_FAMILY --output json --region us-east-1)
 NEW_TASK_DEF=$(echo $OLD_TASK_DEF | jq --arg NDI $NEW_DOCKER_IMAGE \'.taskDefinition.containerDefinitions[0].image=$NDI\')
