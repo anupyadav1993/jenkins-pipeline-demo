@@ -7,11 +7,11 @@ pipeline {
                 git 'https://github.com/wakaleo/game-of-life.git' 
                 withEnv(["PATH+MAVEN=${tool 'm3'}/bin"]) {
                     sh '''
-                    mvn -B -Dmaven.test.failure.ignore=true clean package
+                        mvn -B -Dmaven.test.failure.ignore=true clean package
                     '''
-                }
-                stash excludes: 'target/', includes: '**', name: 'source'
                     }
+                stash excludes: 'target/', includes: '**', name: 'source'
+                }
         }
         stage('Test') {
             steps {
@@ -33,14 +33,13 @@ pipeline {
                 junit '**/gameoflife-web/target/surefire-reports/*.xml'
             }
         }
-
         stage('Approve') {
             steps {
                 timeout(time: 7, unit: 'DAYS') {
                 input('Do you want to proceed?')
+                }
             }
         }
-
         stage('Build') {
             steps {
                  sh'''
@@ -98,7 +97,5 @@ pipeline {
                     '''
                     }
         }
-
     }
 }
-
