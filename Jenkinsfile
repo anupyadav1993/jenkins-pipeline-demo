@@ -45,6 +45,7 @@ echo "Creating docker image..."
 cd $WORKSPACE@2/gameoflife-web
 git_tag=$(git tag --sort version:refname| tail -1)
 docker_image=$IMAGE_NAME:$git_tag
+sed -i 's/ROOT/$git_tag/g' Dockerfile
 docker build -t $docker_image .
 if [ $? -eq 0 ]
 then
