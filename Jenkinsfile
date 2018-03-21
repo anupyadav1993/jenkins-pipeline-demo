@@ -15,11 +15,7 @@ pipeline {
               }
             steps {
                 sh '''
-                    mvn clean package
-                    mvn verify
-                    sleep 200
-                    pwd
-                    ls -ltrha
+                    mvn verify clean test package
                 '''
               }
         }
@@ -35,17 +31,20 @@ pipeline {
                 }
             }
         }
+
         stage('Deploy') {
             steps {
                  sh'''
+
                     set -e
                     AWS="/usr/local/bin/aws"
                     DOCKER_LOGIN=`$AWS ecr get-login --no-include-email --region us-east-1`
                     IMAGE_NAME="jenkins-pipeline-demo"
                     ${DOCKER_LOGIN}
                     
-                    echo "Building docker image..."
+                    echo "Creating docker image..."
                     cd $WORKSPACE/gameoflife-web
+
                     git_tag=$(git rev-parse --short HEAD)
                     
                     docker_image=$IMAGE_NAME:$git_tag
