@@ -1,30 +1,20 @@
+def mvnContainer = docker.image('jimschubert/8-jdk-alpine-mvn')
+
 pipeline {
     agent any
     stages {
-        stage('Build') {
-            steps {
-                deleteDir()
-                git 'https://github.com/wakaleo/game-of-life.git' 
-                withEnv(["PATH+MAVEN=${tool 'm3'}/bin"]) {
-                    sh '''
-                        mvn -B -Dmaven.test.failure.ignore=true clean package
-                    '''
-                    }
-                stash excludes: 'target/', includes: '**', name: 'source'
-                }
+        stage('Checkout'){
+            checkout scm
         }
-        stage('Test') {
+
+        stage('Build and Test') {
             steps {
-               unstash 'source' 
-                withEnv(["PATH+MAVEN=${tool 'm3'}/bin"]) {
-                    sh "mvn verify" 
-                }
-                unstash 'source' 
-                withEnv(["PATH+MAVEN=${tool 'm3'}/bin"]) {
+                mvnContainer.inside('-v ~/.m2/repository:/m2repo') {
                     sh '''
-                    set -x
-                    pwd
-                    mvn sonar:sonar'''
+                        mvn -Dmaven.repo.local=/m2repo clean package
+                        mvn verify
+                        mvn sonar:sonar
+                    '''
                 }
             }
         }
