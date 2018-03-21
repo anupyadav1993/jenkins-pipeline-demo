@@ -24,6 +24,7 @@ pipeline {
                 junit '**/gameoflife-web/target/surefire-reports/*.xml'
             }
         }
+        
         stage('Approve') {
             steps {
                 timeout(time: 7, unit: 'DAYS') {
