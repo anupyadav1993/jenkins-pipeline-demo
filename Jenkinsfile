@@ -14,7 +14,7 @@ pipeline {
               }
             steps {
                 sh '''
-                    mvn -Dmaven.repo.local=/m2repo clean package
+                    mvn clean package
                     mvn verify
                 '''
               }
