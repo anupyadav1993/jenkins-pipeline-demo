@@ -23,7 +23,7 @@ pipeline {
     stage('Publish Test Results') {
       steps {
         junit 'gameoflife-core/build/test-results/*.xml'
-        publishHTML target: [allowMissing: false, alwaysLinkToLastBuild: false, keepAll: true, reportDir: 'gameoflife-core/build/reports/tests', reportFiles: 'index.html', reportTitles: 'Report' reportName: 'Report']
+        publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: true, reportDir: 'gameoflife-core/build/reports/tests', reportFiles: 'index.html', reportTitles: 'Report', reportName: 'Report'])
       }
     }
     stage('Approve') {
