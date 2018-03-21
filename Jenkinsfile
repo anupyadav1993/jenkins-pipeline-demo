@@ -9,7 +9,7 @@ pipeline {
         stage('Build and Test') {
             agent {
                 docker{
-                    image 'maven:3.3.3-jdk8'
+                    image 'maven:3.3.3-jdk-8'
                     args '-v ~/.m2/repository:/m2repo'
 
                 }
