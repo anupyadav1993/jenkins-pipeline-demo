@@ -17,6 +17,7 @@ pipeline {
                 sh '''
                     mvn clean package
                     mvn verify
+                    sleep 200
                     pwd
                     ls -ltrha
                 '''
