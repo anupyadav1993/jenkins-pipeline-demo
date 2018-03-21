@@ -4,7 +4,7 @@ pipeline {
     stage('Checkout') {
       steps {
         deleteDir()
-        scm()
+        checkout scm
       }
     }
     stage('Build and Test') {
@@ -15,6 +15,7 @@ pipeline {
         
       }
       steps {
+        ws($WORKSPACE)
         sh '''  
                     mvn verify clean test package
                 '''
