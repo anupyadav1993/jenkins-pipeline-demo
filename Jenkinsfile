@@ -10,8 +10,6 @@ pipeline {
             agent {
                 docker{
                     image 'maven:3.3.3-jdk-8'
-                    args '-v ~/.m2/repository:/m2repo'
-
                 }
             }
             steps{
