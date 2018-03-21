@@ -89,7 +89,3 @@ pipeline {
         }
     }
 }
-
-
-
-docker run -t -d -u 498:496 -v ~/.m2/repository:/m2repo
