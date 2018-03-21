@@ -9,12 +9,11 @@ pipeline {
         stage('Build and Test') {
             agent {
                 docker {
-                  image 'maven:3.3.3-jdk-8'
-                  reuseNode true    
+                  image 'maven:3.3.3-jdk-8'   
                 }
               }
             steps {
-                sh '''
+                sh '''  
                     mvn verify clean test package
                 '''
               }
@@ -24,7 +23,7 @@ pipeline {
                 junit '**/gameoflife-web/target/surefire-reports/*.xml'
             }
         }
-        
+
         stage('Approve') {
             steps {
                 timeout(time: 7, unit: 'DAYS') {
