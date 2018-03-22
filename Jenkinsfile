@@ -1,4 +1,8 @@
+#!groovy
+
+git_tag = null
 pipeline {
+
   agent {
     label 'master'
   }
