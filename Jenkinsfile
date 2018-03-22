@@ -13,7 +13,7 @@ pipeline {
         checkout scm
       }
     }
-    stage('Run Tests')
+    stage('Run Tests'){
       parallel {
         stage('Build and Integration Test') {
           steps {
@@ -21,7 +21,7 @@ pipeline {
                     def dockerImage = docker.image('maven:3.3.3-jdk-8')
                     dockerImage.pull();
                     dockerImage.inside{
-                        sh ''' mvn verify clean test package'''
+                        sh '''mvn verify clean test package'''
                     }
                 }
           }
@@ -34,7 +34,7 @@ pipeline {
             }
           }
         }
-        stage('Quality Test'){
+        stage('Quality Test') {
           steps{
               echo "Quality Testing..."
             }
