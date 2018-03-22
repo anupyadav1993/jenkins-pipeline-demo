@@ -39,7 +39,7 @@ pipeline {
       }
       post {
         success {
-          slackSend (color: '#00FF00', message: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' Report URL: (${env.BUILD_URL}/Report)")
+          slackSend (color: '#00FF00', message: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' Report URL: (${env.BUILD_URL}Report)")
         }
         failure {
           slackSend (color: '#FF0000', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' Publish Test Result Failed (${env.BUILD_URL})")
