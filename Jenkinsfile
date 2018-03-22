@@ -6,7 +6,7 @@ pipeline {
     stage('Checkout') {
       steps {
         deleteDir()
-        ccheckout scm
+        checkout scm
       }
     }
     stage('Build and Test') {
