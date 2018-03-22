@@ -2,7 +2,6 @@
 
 git_tag = null
 pipeline {
-
   agent {
     label 'master'
   }
@@ -68,7 +67,6 @@ pipeline {
         timeout(time: 7, unit: 'HOURS') {
           input 'Do you want to proceed?'
         }
-        
       }
     }
     stage('Deploy') {
