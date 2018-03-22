@@ -67,6 +67,7 @@ git fetch
 git_tag=$(git tag --sort version:refname| tail -1)
 docker_image=$IMAGE_NAME:$git_tag
 sed -i 's/custom/$git_tag/g' Dockerfile
+cat Dockerfile
 docker build -t $docker_image .
 if [ $? -eq 0 ]
 then
