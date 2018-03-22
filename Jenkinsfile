@@ -6,20 +6,18 @@ pipeline {
     stage('Checkout') {
       steps {
         deleteDir()
-        checkout scm
+        ccheckout scm
       }
     }
     stage('Build and Test') {
-      agent {
-        docker {
-          image 'maven:3.3.3-jdk-8'
-        }
-        
-      }
       steps {
-        sh '''  
-                    mvn verify clean test package
-                '''
+        script{
+                def dockerImage = docker.image('maven:3.3.3-jdk-8')
+                dockerImage.pull();
+                dockerImage.inside{
+                    sh ''' mvn verify clean test package'''
+                }
+            }
       }
       post {
         success {
@@ -60,8 +58,7 @@ DOCKER_LOGIN=`$AWS ecr get-login --no-include-email --region us-east-1`
 IMAGE_NAME="jenkins-pipeline-demo"
 ${DOCKER_LOGIN}
 echo "Creating docker image..."
-NEW_WORKSPACE=$WORKSPACE@`expr $EXECUTOR_NUMBER + 1`
-cd $NEW_WORKSPACE/gameoflife-web
+cd $WORKSPACE/gameoflife-web
 git_tag=$(git tag --sort version:refname| tail -1)
 docker_image=$IMAGE_NAME:$git_tag
 sed -i 's/ROOT/$git_tag/g' Dockerfile
@@ -78,15 +75,15 @@ docker push 940345575562.dkr.ecr.us-east-1.amazonaws.com/$docker_image
 if [ $? -eq 0 ]
 then
     echo "Successfully image tagged and pushed to repository"
-    echo 940345575562.dkr.ecr.us-east-1.amazonaws.com/$docker_image > $NEW_WORKSPACE/image_id
-    cat $NEW_WORKSPACE/image_id
+    echo 940345575562.dkr.ecr.us-east-1.amazonaws.com/$docker_image > $WORKSPACE/image_id
+    cat $WORKSPACE/image_id
 else
     echo "Error in tagging/pushing image"
     exit 1
 fi
 TASK_FAMILY="jenkins-pipeline-demo-td"
 SERVICE_NAME="jenkins-pipeline-demo-svc"
-NEW_DOCKER_IMAGE=`cat $NEW_WORKSPACE/image_id`
+NEW_DOCKER_IMAGE=`cat $WORKSPACE/image_id`
 CLUSTER_NAME="jenkins-pipeline-demo"
 OLD_TASK_DEF=$($AWS ecs describe-task-definition --task-definition $TASK_FAMILY --output json --region us-east-1)
 NEW_TASK_DEF=$(echo $OLD_TASK_DEF | jq --arg NDI $NEW_DOCKER_IMAGE \'.taskDefinition.containerDefinitions[0].image=$NDI\')
