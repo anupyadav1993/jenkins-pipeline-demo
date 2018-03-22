@@ -68,7 +68,6 @@ pipeline {
         timeout(time: 7, unit: 'HOURS') {
           input 'Do you want to proceed?'
         }
-        
       }
     }
     stage('Deploy') {
