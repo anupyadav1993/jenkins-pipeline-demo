@@ -15,13 +15,20 @@ pipeline {
     }
     stage('Build and Test') {
       steps {
-        script{
+        parallel(
+          Integeration Test: {
+            script{
                 def dockerImage = docker.image('maven:3.3.3-jdk-8')
                 dockerImage.pull();
                 dockerImage.inside{
                     sh ''' mvn verify clean test package'''
                 }
             }
+          },
+          Quality Testing: {
+            echo "Quality Testing..."
+          }
+        )  
       }
       post {
         success {
@@ -34,8 +41,17 @@ pipeline {
     }
     stage('Publish Test Results') {
       steps {
-        junit 'gameoflife-core/build/test-results/*.xml'
-        publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: true, reportDir: 'gameoflife-core/build/reports/tests', reportFiles: 'index.html', reportTitles: 'Report', reportName: 'Report'])
+        parallel(
+          Integeration Test: {
+            junit 'gameoflife-core/build/test-results/*.xml'
+            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: true, reportDir: 'gameoflife-core/build/reports/tests', reportFiles: 'index.html', reportTitles: 'Report', reportName: 'Report'])
+            }
+          Quality Testing: {
+            echo "Quality Testing...."
+
+          }
+        )
+        
       }
       post {
         success {
