@@ -59,6 +59,7 @@ IMAGE_NAME="jenkins-pipeline-demo"
 ${DOCKER_LOGIN}
 echo "Creating docker image..."
 cd $WORKSPACE/gameoflife-web
+git fetch
 git_tag=$(git tag --sort version:refname| tail -1)
 docker_image=$IMAGE_NAME:$git_tag
 sed -i 's/ROOT/$git_tag/g' Dockerfile
