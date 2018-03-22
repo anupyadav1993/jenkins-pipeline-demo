@@ -13,24 +13,41 @@ pipeline {
         checkout scm
       }
     }
-    stage('Build and Test') {
-      steps {
-        script{
-                def dockerImage = docker.image('maven:3.3.3-jdk-8')
-                dockerImage.pull();
-                dockerImage.inside{
-                    sh ''' mvn verify clean test package'''
+    stage('Run Tests')
+      parallel {
+        stage('Build and Integration Test') {
+          steps {
+            script{
+                    def dockerImage = docker.image('maven:3.3.3-jdk-8')
+                    dockerImage.pull();
+                    dockerImage.inside{
+                        sh ''' mvn verify clean test package'''
+                    }
                 }
+          }
+          post {
+            success {
+              slackSend (color: '#00FF00', message: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' Build and Integration Tested(${env.BUILD_URL})")
             }
-      }
-      post {
-        success {
-          slackSend (color: '#00FF00', message: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' Build and Tested(${env.BUILD_URL})")
+            failure {
+              slackSend (color: '#FF0000', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' Quality Test Done (${env.BUILD_URL})")
+            }
+          }
         }
-        failure {
-          slackSend (color: '#FF0000', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' Build and Test (${env.BUILD_URL})")
+        stage('Quality Test'){
+          steps{
+              echo "Quality Testing..."
+            }
+          post {
+            success {
+              slackSend (color: '#00FF00', message: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' Build and Tested(${env.BUILD_URL})")
+            }
+            failure {
+              slackSend (color: '#FF0000', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' Build and Test (${env.BUILD_URL})")
+            }
+          } 
         }
-      }
+      }      
     }
     stage('Publish Test Results') {
       steps {
