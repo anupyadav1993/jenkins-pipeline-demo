@@ -1,8 +1,10 @@
 #!groovy
 
-git_tag = null
-pipeline {
+/*
+Global Variables Defined
+*/
 
+pipeline {
   agent {
     label 'master'
   }
@@ -13,15 +15,31 @@ pipeline {
         checkout scm
       }
     }
+    stage('Build') {
+      steps {
+            script{
+                    def dockerImage = docker.image('maven:3.3.3-jdk-8')
+                    dockerImage.pull();
+                    dockerImage.inside{
+                        sh '''mvn clean package'''
+                    }
+                }
+          }
+    }
     stage('Run Tests'){
+      when {
+        expression {
+          env.BRANCH_NAME != 'master'
+        }
+      }
       parallel {
-        stage('Build and Integration Test') {
+        stage('Integration Test') {
           steps {
             script{
                     def dockerImage = docker.image('maven:3.3.3-jdk-8')
                     dockerImage.pull();
                     dockerImage.inside{
-                        sh '''mvn verify clean test package'''
+                        sh '''mvn clean verify test package'''
                     }
                 }
           }
@@ -50,6 +68,11 @@ pipeline {
       }      
     }
     stage('Publish Test Results') {
+      when {
+        expression {
+          env.BRANCH_NAME != 'master'
+        }
+      }
       steps {
         junit 'gameoflife-core/build/test-results/*.xml'
         publishHTML(target:[allowMissing: false, alwaysLinkToLastBuild: false, keepAll: true, reportDir: 'gameoflife-core/build/reports/tests', reportFiles: 'index.html', reportTitles: 'Report', reportName: 'Report'])
@@ -64,14 +87,23 @@ pipeline {
       }
     }
     stage('Approve') {
+      when {
+        expression {
+          env.BRANCH_NAME = 'master'
+        }
+      }
       steps {
         timeout(time: 7, unit: 'HOURS') {
           input 'Do you want to proceed?'
         }
-        
       }
     }
     stage('Deploy') {
+      when {
+        expression {
+          env.CHANGE_ID == null
+        }
+      }
       steps {
         sh '''set -e
 AWS="/usr/local/bin/aws"
@@ -122,10 +154,15 @@ fi
 echo "Now deploying new version..."
 $AWS ecs update-service --service $SERVICE_NAME  --desired-count 1 --task-definition $TASK_FAMILY --cluster $CLUSTER_NAME  --region us-east-1
                     '''
+                    script{
+                      sh (script: "git tag --sort version:refname| tail -1 > git_tag_file", returnStdout: true)
+                      
+                      env.git_tag_env = readFile 'git_tag_file'
+                    }
       }
       post {
         success {
-          slackSend (color: '#00FF00', message: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' Application Deployed (demo-application.tothenew.net/$git_tag)")
+          slackSend (color: '#00FF00', message: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' Application Deployed (demo-application.tothenew.net/${env.git_tag_env})")
         }
         failure {
           slackSend (color: '#FF0000', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' Application Deployment Failed (${env.BUILD_URL})")
