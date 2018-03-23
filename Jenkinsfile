@@ -1,10 +1,15 @@
 #!groovy
 
+/*
+Global Variables Defined
+*/
 git_tag = null
+
 pipeline {
   agent {
     label 'master'
   }
+
   stages {
     stage('Checkout') {
       steps {
@@ -12,15 +17,31 @@ pipeline {
         checkout scm
       }
     }
+    stage('Build') {
+      steps {
+            script{
+                    def dockerImage = docker.image('maven:3.3.3-jdk-8')
+                    dockerImage.pull();
+                    dockerImage.inside{
+                        sh '''mvn clean package'''
+                    }
+                }
+          }
+    }
     stage('Run Tests'){
+      when {
+        expression {
+          return env.BRANCH_NAME != 'master';
+        }
+      }
       parallel {
-        stage('Build and Integration Test') {
+        stage('Integration Test') {
           steps {
             script{
                     def dockerImage = docker.image('maven:3.3.3-jdk-8')
                     dockerImage.pull();
                     dockerImage.inside{
-                        sh '''mvn verify clean test package'''
+                        sh '''mvn verify test'''
                     }
                 }
           }
@@ -49,6 +70,11 @@ pipeline {
       }      
     }
     stage('Publish Test Results') {
+      when {
+        expression {
+          return env.BRANCH_NAME != 'master';
+        }
+      }
       steps {
         junit 'gameoflife-core/build/test-results/*.xml'
         publishHTML(target:[allowMissing: false, alwaysLinkToLastBuild: false, keepAll: true, reportDir: 'gameoflife-core/build/reports/tests', reportFiles: 'index.html', reportTitles: 'Report', reportName: 'Report'])
@@ -63,6 +89,11 @@ pipeline {
       }
     }
     stage('Approve') {
+      when {
+        expression {
+          return env.BRANCH_NAME = 'master';
+        }
+      }
       steps {
         timeout(time: 7, unit: 'HOURS') {
           input 'Do you want to proceed?'
@@ -70,6 +101,11 @@ pipeline {
       }
     }
     stage('Deploy') {
+      when {
+        expression {
+          return env.BRANCH_NAME = 'master';
+        }
+      }
       steps {
         sh '''set -e
 AWS="/usr/local/bin/aws"
