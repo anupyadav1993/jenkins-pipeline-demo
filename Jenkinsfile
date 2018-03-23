@@ -89,7 +89,7 @@ pipeline {
     stage('Approve') {
       when {
         expression {
-          env.BRANCH_NAME = 'master'
+          env.BRANCH_NAME == 'master'
         }
       }
       steps {
