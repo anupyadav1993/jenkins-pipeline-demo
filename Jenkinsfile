@@ -3,13 +3,11 @@
 /*
 Global Variables Defined
 */
-git_tag = null
 
 pipeline {
   agent {
     label 'master'
   }
-
   stages {
     stage('Checkout') {
       steps {
@@ -31,7 +29,7 @@ pipeline {
     stage('Run Tests'){
       when {
         expression {
-          return env.BRANCH_NAME != 'master';
+          env.BRANCH_NAME != 'master'
         }
       }
       parallel {
@@ -41,7 +39,7 @@ pipeline {
                     def dockerImage = docker.image('maven:3.3.3-jdk-8')
                     dockerImage.pull();
                     dockerImage.inside{
-                        sh '''mvn verify test'''
+                        sh '''mvn clean verify test package'''
                     }
                 }
           }
@@ -72,7 +70,7 @@ pipeline {
     stage('Publish Test Results') {
       when {
         expression {
-          return env.BRANCH_NAME != 'master';
+          env.BRANCH_NAME != 'master'
         }
       }
       steps {
@@ -91,7 +89,7 @@ pipeline {
     stage('Approve') {
       when {
         expression {
-          return env.BRANCH_NAME = 'master';
+          env.BRANCH_NAME = 'master'
         }
       }
       steps {
@@ -103,7 +101,7 @@ pipeline {
     stage('Deploy') {
       when {
         expression {
-          return env.BRANCH_NAME = 'master';
+          env.CHANGE_ID == null
         }
       }
       steps {
@@ -156,10 +154,15 @@ fi
 echo "Now deploying new version..."
 $AWS ecs update-service --service $SERVICE_NAME  --desired-count 1 --task-definition $TASK_FAMILY --cluster $CLUSTER_NAME  --region us-east-1
                     '''
+                    script{
+                      sh (script: "git tag --sort version:refname| tail -1 > git_tag_file", returnStdout: true)
+                      
+                      env.git_tag_env = readFile 'git_tag_file'
+                    }
       }
       post {
         success {
-          slackSend (color: '#00FF00', message: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' Application Deployed (demo-application.tothenew.net/$git_tag)")
+          slackSend (color: '#00FF00', message: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' Application Deployed (demo-application.tothenew.net/${env.git_tag_env})")
         }
         failure {
           slackSend (color: '#FF0000', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' Application Deployment Failed (${env.BUILD_URL})")
