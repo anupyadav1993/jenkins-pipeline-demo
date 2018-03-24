@@ -25,7 +25,7 @@ pipeline {
                     def dockerImage = docker.image('maven:3.3.3-jdk-8')
                     dockerImage.pull();
                     dockerImage.inside{
-                        sh '''mvn clean verify test'''
+                        sh '''mvn clean verify test package'''
                     }
                 }
           }
