@@ -1,14 +1,11 @@
 #!groovy
 
-/*
-Global Variables Defined
-*/
-
 pipeline {
   agent {
     label 'master'
   }
   stages {
+    // Git Checkout for  
     stage('Checkout') {
       steps {
         deleteDir()
