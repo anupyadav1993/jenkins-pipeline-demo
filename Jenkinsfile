@@ -22,6 +22,14 @@ pipeline {
                     }
                 }
           }
+      post {
+            success {
+              slackSend (color: '#00FF00', message: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' Build Success (${env.BUILD_URL})")
+            }
+            failure {
+              slackSend (color: '#FF0000', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' Build Failed (${env.BUILD_URL})")
+            }
+          }
     }
     stage('Run Tests'){
       when {
@@ -42,10 +50,10 @@ pipeline {
           }
           post {
             success {
-              slackSend (color: '#00FF00', message: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' Build and Integration Tested(${env.BUILD_URL})")
+              slackSend (color: '#00FF00', message: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' Integration Test Successful(${env.BUILD_URL})")
             }
             failure {
-              slackSend (color: '#FF0000', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' Quality Test Done (${env.BUILD_URL})")
+              slackSend (color: '#FF0000', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' Integration Test Failed (${env.BUILD_URL})")
             }
           }
         }
@@ -55,10 +63,10 @@ pipeline {
             }
           post {
             success {
-              slackSend (color: '#00FF00', message: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' Build and Tested(${env.BUILD_URL})")
+              slackSend (color: '#00FF00', message: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' Quality Test Successful(${env.BUILD_URL})")
             }
             failure {
-              slackSend (color: '#FF0000', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' Build and Test (${env.BUILD_URL})")
+              slackSend (color: '#FF0000', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' Quality Test Failed (${env.BUILD_URL})")
             }
           } 
         }
