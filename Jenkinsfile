@@ -12,25 +12,6 @@ pipeline {
         checkout scm
       }
     }
-    stage('Build') {
-      steps {
-            script{
-                    def dockerImage = docker.image('maven:3.3.3-jdk-8')
-                    dockerImage.pull();
-                    dockerImage.inside{
-                        sh '''mvn clean package'''
-                    }
-                }
-          }
-      post {
-            success {
-              slackSend (color: '#00FF00', message: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' Build Success (${env.BUILD_URL})")
-            }
-            failure {
-              slackSend (color: '#FF0000', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' Build Failed (${env.BUILD_URL})")
-            }
-          }
-    }
     stage('Run Tests'){
       when {
         expression {
@@ -44,7 +25,7 @@ pipeline {
                     def dockerImage = docker.image('maven:3.3.3-jdk-8')
                     dockerImage.pull();
                     dockerImage.inside{
-                        sh '''mvn clean verify test package'''
+                        sh '''mvn clean verify test'''
                     }
                 }
           }
@@ -91,6 +72,26 @@ pipeline {
         }
       }
     }
+    stage('Build') {
+      steps {
+            script{
+                    def dockerImage = docker.image('maven:3.3.3-jdk-8')
+                    dockerImage.pull();
+                    dockerImage.inside{
+                        sh '''mvn clean package'''
+                    }
+                }
+          }
+      post {
+            success {
+              slackSend (color: '#00FF00', message: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' Build Success (${env.BUILD_URL})")
+            }
+            failure {
+              slackSend (color: '#FF0000', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' Build Failed (${env.BUILD_URL})")
+            }
+          }
+    }
+    
     stage('Approve') {
       when {
         expression {
